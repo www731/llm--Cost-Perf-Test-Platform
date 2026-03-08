@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0">
+  <hashTree>
+    <!-- 测试计划配置 -->
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Ollama本地模型性能测试计划">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="OLLAMA_BASE_URL" elementType="Argument">
+            <stringProp name="Argument.name">OLLAMA_BASE_URL</stringProp>
+            <stringProp name="Argument.value">http://localhost:11434</stringProp>
+            <stringProp name="Argument.desc">Ollama服务基础URL</stringProp>
+          </elementProp>
+          <elementProp name="MODEL_NAME" elementType="Argument">
+            <stringProp name="Argument.name">MODEL_NAME</stringProp>
+            <stringProp name="Argument.value">deepseek-r1:1.5b</stringProp>
+            <stringProp name="Argument.desc">模型名称</stringProp>
+          </elementProp>
+          <elementProp name="CONCURRENT_USERS" elementType="Argument">
+            <stringProp name="Argument.name">CONCURRENT_USERS</stringProp>
+            <stringProp name="Argument.value">20</stringProp>
+            <stringProp name="Argument.desc">并发用户数</stringProp>
+          </elementProp>
+          <elementProp name="TEST_DURATION" elementType="Argument">
+            <stringProp name="Argument.name">TEST_DURATION</stringProp>
+            <stringProp name="Argument.value">300</stringProp>
+            <stringProp name="Argument.desc">测试持续时间</stringProp>
+          </elementProp>
+          <elementProp name="RAMP_UP" elementType="Argument">
+            <stringProp name="Argument.name">RAMP_UP</stringProp>
+            <stringProp name="Argument.value">30</stringProp>
+            <stringProp name="Argument.desc">预热时间</stringProp>
+          </elementProp>
+          <elementProp name="TEMPERATURE" elementType="Argument">
+            <stringProp name="Argument.name">TEMPERATURE</stringProp>
+            <stringProp name="Argument.value">0.7</stringProp>
+            <stringProp name="Argument.desc">温度参数</stringProp>
+          </elementProp>
+          <elementProp name="MAX_TOKENS" elementType="Argument">
+            <stringProp name="Argument.name">MAX_TOKENS</stringProp>
+            <stringProp name="Argument.value">1024</stringProp>
+            <stringProp name="Argument.desc">最大token数</stringProp>
+          </elementProp>
+          <elementProp name="TOP_P" elementType="Argument">
+            <stringProp name="Argument.name">TOP_P</stringProp>
+            <stringProp name="Argument.value">0.9</stringProp>
+            <stringProp name="Argument.desc">Top-p参数</stringProp>
+          </elementProp>
+          <elementProp name="STREAM" elementType="Argument">
+            <stringProp name="Argument.name">STREAM</stringProp>
+            <stringProp name="Argument.value">false</stringProp>
+            <stringProp name="Argument.desc">是否流式输出</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+
+      <!-- ==================== 全局配置 ==================== -->
+
+      <!-- 用户定义变量（可被命令行覆盖） -->
+      <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="用户定义变量">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="base_url" elementType="Argument">
+            <stringProp name="Argument.name">base_url</stringProp>
+            <stringProp name="Argument.value">${__P(base_url,http://localhost:11434)}</stringProp>
+            <stringProp name="Argument.desc">Ollama服务地址</stringProp>
+          </elementProp>
+          <elementProp name="model" elementType="Argument">
+            <stringProp name="Argument.name">model</stringProp>
+            <stringProp name="Argument.value">${__P(model,deepseek-r1:1.5b)}</stringProp>
+            <stringProp name="Argument.desc">模型名称</stringProp>
+          </elementProp>
+          <elementProp name="users" elementType="Argument">
+            <stringProp name="Argument.name">users</stringProp>
+            <stringProp name="Argument.value">${__P(users,20)}</stringProp>
+            <stringProp name="Argument.desc">并发用户数</stringProp>
+          </elementProp>
+          <elementProp name="duration" elementType="Argument">
+            <stringProp name="Argument.name">duration</stringProp>
+            <stringProp name="Argument.value">${__P(duration,300)}</stringProp>
+            <stringProp name="Argument.desc">测试时长(秒)</stringProp>
+          </elementProp>
+          <elementProp name="rampup" elementType="Argument">
+            <stringProp name="Argument.name">rampup</stringProp>
+            <stringProp name="Argument.value">${__P(rampup,30)}</stringProp>
+            <stringProp name="Argument.desc">爬升时间(秒)</stringProp>
+          </elementProp>
+          <elementProp name="temperature" elementType="Argument">
+            <stringProp name="Argument.name">temperature</stringProp>
+            <stringProp name="Argument.value">${__P(temperature,0.7)}</stringProp>
+            <stringProp name="Argument.desc">温度参数</stringProp>
+          </elementProp>
+          <elementProp name="max_tokens" elementType="Argument">
+            <stringProp name="Argument.name">max_tokens</stringProp>
+            <stringProp name="Argument.value">${__P(max_tokens,1024)}</stringProp>
+            <stringProp name="Argument.desc">最大输出token</stringProp>
+          </elementProp>
+          <elementProp name="stream" elementType="Argument">
+            <stringProp name="Argument.name">stream</stringProp>
+            <stringProp name="Argument.value">${__P(stream,false)}</stringProp>
+            <stringProp name="Argument.desc">是否流式输出</stringProp>
+          </elementProp>
+          <elementProp name="top_p" elementType="Argument">
+            <stringProp name="Argument.name">top_p</stringProp>
+            <stringProp name="Argument.value">${__P(top_p,0.9)}</stringProp>
+            <stringProp name="Argument.desc">Top-p参数</stringProp>
+          </elementProp>
+          <elementProp name="budget" elementType="Argument">
+            <stringProp name="Argument.name">budget</stringProp>
+            <stringProp name="Argument.value">${__P(budget,1.0)}</stringProp>
+            <stringProp name="Argument.desc">预算限制(美元)</stringProp>
+          </elementProp>
+        </collectionProp>
+      </Arguments>
+      <hashTree/>
+
+      <!-- HTTP请求默认值 -->
+      <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP请求默认值">
+        <stringProp name="HTTPSampler.domain">localhost</stringProp>
+        <stringProp name="HTTPSampler.port">11434</stringProp>
+        <stringProp name="HTTPSampler.protocol">http</stringProp>
+        <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+        <stringProp name="HTTPSampler.path"></stringProp>
+        <stringProp name="HTTPSampler.concurrentPool">4</stringProp>
+      </ConfigTestElement>
+      <hashTree/>
+
+      <!-- HTTP头管理器 -->
+      <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP头管理器">
+        <collectionProp name="HeaderManager.headers">
+          <elementProp name="Content-Type" elementType="Header">
+            <stringProp name="Header.name">Content-Type</stringProp>
+            <stringProp name="Header.value">application/json</stringProp>
+          </elementProp>
+          <elementProp name="Accept" elementType="Header">
+            <stringProp name="Header.name">Accept</stringProp>
+            <stringProp name="Header.value">application/json</stringProp>
+          </elementProp>
+        </collectionProp>
+      </HeaderManager>
+      <hashTree/>
+
+      <!-- CSV数据集配置（读取Prompt） -->
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV数据集 - Prompts">
+        <stringProp name="filename">jmeter/data/prompts.csv</stringProp>
+        <stringProp name="fileEncoding">UTF-8</stringProp>
+        <stringProp name="variableNames">prompt_type,prompt,expected_min,expected_max</stringProp>
+        <boolProp name="ignoreFirstLine">true</boolProp>
+        <boolProp name="quotedData">false</boolProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">false</boolProp>
+        <stringProp name="shareMode">shareMode.all</stringProp>
+        <boolProp name="independentList">false</boolProp>
+      </CSVDataSet>
+      <hashTree/>
+
+      <!-- 计数器（用于生成唯一ID） -->
+      <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="请求计数器">
+        <boolProp name="CounterConfig.per_user">false</boolProp>
+        <boolProp name="CounterConfig.reset_on_thread_group_iteration">false</boolProp>
+        <stringProp name="CounterConfig.start">1</stringProp>
+        <stringProp name="CounterConfig.end">1000000</stringProp>
+        <stringProp name="CounterConfig.incr">1</stringProp>
+        <stringProp name="CounterConfig.format">00000</stringProp>
+        <stringProp name="CounterConfig.var_name">request_id</stringProp>
+      </CounterConfig>
+      <hashTree/>
+
+      <!-- ==================== 线程组 ==================== -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Ollama性能测试线程组">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${users}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${rampup}</stringProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${duration}</stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+
+        <!-- ==================== 事务控制器 ==================== -->
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Ollama请求事务">
+          <boolProp name="TransactionController.includeTimers">false</boolProp>
+          <boolProp name="TransactionController.parent">false</boolProp>
+        </TransactionController>
+        <hashTree>
+
+          <!-- ==================== HTTP请求：非流式生成 ==================== -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Ollama Generate (非流式)">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPSampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="request_body" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{
+  "model": "${model}",
+  "prompt": "${prompt}",
+  "stream": ${stream},
+  "options": {
+    "temperature": ${temperature},
+    "num_predict": ${max_tokens},
+    "top_p": ${top_p},
+    "stop": ["\n\n", "User:", "Human:"]
+  }
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">localhost</stringProp>
+            <stringProp name="HTTPSampler.port">11434</stringProp>
+            <stringProp name="HTTPSampler.protocol">http</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">/api/generate</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">false</boolProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+
+            <!-- JSON提取器：提取响应内容 -->
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON提取器 - 响应内容">
+              <stringProp name="JSONPostProcessor.referenceNames">ollama_response</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.response</stringProp>
+              <stringProp name="JSONPostProcessor.match_numbers">0</stringProp>
+            </JSONPostProcessor>
+            <hashTree/>
+
+            <!-- JSON提取器：提取Token信息（Ollama格式） -->
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON提取器 - Token信息">
+              <stringProp name="JSONPostProcessor.referenceNames">prompt_eval_count,eval_count,total_duration,prompt_eval_duration,eval_duration</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.prompt_eval_count,$.eval_count,$.total_duration,$.prompt_eval_duration,$.eval_duration</stringProp>
+              <stringProp name="JSONPostProcessor.match_numbers">0</stringProp>
+            </JSONPostProcessor>
+            <hashTree/>
+
+            <!-- JSR223后处理器：处理Ollama响应 -->
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223后处理器 - Ollama响应处理">
+              <stringProp name="cacheKey"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import groovy.json.JsonSlurper
+
+// 获取响应数据
+def responseData = prev.getResponseDataAsString()
+def responseCode = prev.getResponseCode()
+
+log.info("Ollama响应状态码: " + responseCode)
+
+if (responseCode == "200") {
+    try {
+        // 解析JSON
+        def jsonResponse = new JsonSlurper().parseText(responseData)
+
+        // 提取Token信息
+        def promptTokens = jsonResponse.prompt_eval_count ?: 0
+        def completionTokens = jsonResponse.eval_count ?: 0
+        def totalTokens = promptTokens + completionTokens
+
+        // 提取耗时信息（纳秒转毫秒）
+        def totalDurationMs = jsonResponse.total_duration ? jsonResponse.total_duration / 1000000 : 0
+        def promptEvalDurationMs = jsonResponse.prompt_eval_duration ? jsonResponse.prompt_eval_duration / 1000000 : 0
+        def evalDurationMs = jsonResponse.eval_duration ? jsonResponse.eval_duration / 1000000 : 0
+
+        // 存储变量
+        vars.put("prompt_tokens", promptTokens.toString())
+        vars.put("completion_tokens", completionTokens.toString())
+        vars.put("total_tokens", totalTokens.toString())
+        vars.put("total_duration_ms", totalDurationMs.toString())
+        vars.put("prompt_eval_duration_ms", promptEvalDurationMs.toString())
+        vars.put("eval_duration_ms", evalDurationMs.toString())
+
+        // 计算Tokens Per Second
+        if (evalDurationMs > 0) {
+            def tokensPerSec = completionTokens / (evalDurationMs / 1000)
+            vars.put("tokens_per_sec", String.format("%.2f", tokensPerSec))
+        }
+
+        // 提取响应内容（用于日志）
+        def responseText = jsonResponse.response ?: ""
+        if (responseText.length() > 200) {
+            responseText = responseText.substring(0, 200) + "..."
+        }
+        vars.put("response_preview", responseText)
+
+        log.info(String.format("Ollama Token - prompt:%d, completion:%d, total:%d, tokens/s:%s",
+            promptTokens, completionTokens, totalTokens, vars.get("tokens_per_sec")))
+
+    } catch (Exception e) {
+        log.error("解析Ollama响应失败: " + e.toString())
+        log.error("响应内容: " + responseData.substring(0, Math.min(500, responseData.length())))
+        vars.put("total_tokens", "0")
+    }
+} else {
+    log.warn("Ollama请求失败，状态码: " + responseCode)
+    vars.put("total_tokens", "0")
+}</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+
+            <!-- 修改断言：使用更宽松的成功判断 -->
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="响应断言 - 状态码200">
+              <collectionProp name="Assertion.test_strings">
+                <stringProp name="510840863">200</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+
+          </hashTree>
+
+          <!-- 注释掉流式请求以避免冲突 -->
+          <!--
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Ollama Generate (流式)">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPSampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="request_body" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{
+  "model": "${model}",
+  "prompt": "${prompt}",
+  "stream": true,
+  "options": {
+    "temperature": ${temperature},
+    "num_predict": ${max_tokens}
+  }
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">localhost</stringProp>
+            <stringProp name="HTTPSampler.port">11434</stringProp>
+            <stringProp name="HTTPSampler.protocol">http</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">/api/generate</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="响应断言 - 流式响应">
+              <collectionProp name="Assertion.test_strings">
+                <stringProp name="510840863">"model"</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+
+          </hashTree>
+          -->
+
+          <!-- 注释掉聊天接口请求以避免冲突 -->
+          <!--
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Ollama Chat (对话格式)">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPSampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="request_body" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{
+  "model": "${model}",
+  "messages": [
+    {
+      "role": "user",
+      "content": "${prompt}"
+    }
+  ],
+  "stream": ${stream},
+  "options": {
+    "temperature": ${temperature}
+  }
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">localhost</stringProp>
+            <stringProp name="HTTPSampler.port">11434</stringProp>
+            <stringProp name="HTTPSampler.protocol">http</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">/api/chat</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON提取器 - 聊天内容">
+              <stringProp name="JSONPostProcessor.referenceNames">chat_response</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.message.content</stringProp>
+              <stringProp name="JSONPostProcessor.match_numbers">0</stringProp>
+            </JSONPostProcessor>
+            <hashTree/>
+
+          </hashTree>
+          -->
+
+        </hashTree>
+
+        <!-- ==================== 性能监控采样器 ==================== -->
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="性能监控采样器">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">// 记录当前请求的性能数据到Props（用于全局统计）
+def totalTokens = vars.get(&quot;total_tokens&quot;)
+def responseTime = prev.getTime()
+
+if (totalTokens != null &amp;&amp; totalTokens.isInteger() &amp;&amp; totalTokens.toInteger() &gt; 0) {
+    def currentTotalTokens = props.get(&quot;total_tokens_sum&quot;)
+    def currentRequestCount = props.get(&quot;total_requests_count&quot;)
+
+    props.put(&quot;total_tokens_sum&quot;, (currentTotalTokens ? currentTotalTokens.toInteger() : 0) + totalTokens.toInteger())
+    props.put(&quot;total_requests_count&quot;, (currentRequestCount ? currentRequestCount.toInteger() : 0) + 1)
+
+    // 记录响应时间
+    def totalResponseTime = props.get(&quot;total_response_time&quot;)
+    props.put(&quot;total_response_time&quot;, (totalResponseTime ? totalResponseTime.toLong() : 0) + responseTime)
+}
+
+// 计算当前TPS（每10秒更新一次）
+def currentTime = System.currentTimeMillis() / 1000
+def lastCalcTime = props.get(&quot;last_tps_calc_time&quot;)
+
+if (lastCalcTime == null || currentTime - lastCalcTime.toLong() &gt; 10) {
+    def totalRequests = props.get(&quot;total_requests_count&quot;)?.toInteger() ?: 0
+    props.put(&quot;last_tps_calc_time&quot;, currentTime.toString())
+    props.put(&quot;last_tps_requests&quot;, totalRequests.toString())
+}</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+
+        <!-- ==================== 监听器 ==================== -->
+
+        <!-- 查看结果树（调试用） -->
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="查看结果树">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>true</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">results/jtl/results-ollama-${__time(yyyyMMdd-HHmmss)}.jtl</stringProp>
+        </ResultCollector>
+        <hashTree/>
+
+        <!-- 聚合报告 -->
+        <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="聚合报告">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>true</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">results/jtl/summary-ollama-${__time(yyyyMMdd-HHmmss)}.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+
+        <!-- 响应时间百分比 -->
+        <ResultCollector guiclass="RespTimeGraphVisualizer" testclass="ResultCollector" testname="响应时间曲线">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>true</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+        </ResultCollector>
+        <hashTree/>
+
+        <!-- 活跃线程数监控 -->
+        <ResultCollector guiclass="MonitorHealthVisualizer" testclass="ResultCollector" testname="活跃线程监控">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+        </ResultCollector>
+        <hashTree/>
+
+      </hashTree>
+
+      <!-- ==================== 全局后处理器 ==================== -->
+
+      <!-- JSR223监听器：测试结束时输出汇总信息 -->
+      <ResultCollector guiclass="BeanShellListenerGui" testclass="ResultCollector" testname="JSR223监听器 - 测试汇总">
+        <stringProp name="filename"></stringProp>
+        <collectionProp name="Arguments.arguments"/>
+        <stringProp name="script">import groovy.json.JsonBuilder
+import java.text.SimpleDateFormat
+
+// 测试结束时的汇总处理
+def endTime = System.currentTimeMillis()
+def totalRequests = props.get("total_requests_count")?.toInteger() ?: 0
+def totalTokens = props.get("total_tokens_sum")?.toInteger() ?: 0
+def totalResponseTime = props.get("total_response_time")?.toLong() ?: 0
+
+log.info("="*50)
+log.info("Ollama测试汇总")
+log.info("="*50)
+log.info("总请求数: " + totalRequests)
+log.info("总Token数: " + totalTokens)
+log.info("平均每请求Token: " + (totalRequests > 0 ? (totalTokens / totalRequests) : 0))
+log.info("平均响应时间: " + (totalRequests > 0 ? (totalResponseTime / totalRequests) : 0) + " ms")
+
+// 计算TPS
+def startTime = Long.parseLong(vars.get("TEST_START_TIME") ?: "0")
+if (startTime > 0) {
+    def durationSec = (endTime - startTime) / 1000
+    def tps = totalRequests / durationSec
+    log.info("总耗时: " + durationSec + " 秒")
+    log.info("平均TPS: " + String.format("%.2f", tps))
+}
+
+// 生成简单JSON报告
+def summary = [
+    test_time: new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()),
+    total_requests: totalRequests,
+    total_tokens: totalTokens,
+    avg_tokens_per_request: totalRequests > 0 ? (totalTokens / totalRequests) : 0,
+    avg_response_time_ms: totalRequests > 0 ? (totalResponseTime / totalRequests) : 0,
+    model: vars.get("model"),
+    concurrent_users: vars.get("users")
+]
+
+def jsonFile = new File("results/summary/ollama-summary-" + System.currentTimeMillis() + ".json")
+jsonFile.write(new JsonBuilder(summary).toPrettyString())
+
+log.info("汇总已保存: " + jsonFile.getAbsolutePath())
+log.info("="*50)</stringProp>
+        <stringProp name="scriptLanguage">groovy</stringProp>
+      </ResultCollector>
+      <hashTree/>
+
+      <!-- 记录测试开始时间 -->
+      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="记录测试开始时间">
+        <stringProp name="scriptLanguage">groovy</stringProp>
+        <stringProp name="script">vars.put("TEST_START_TIME", System.currentTimeMillis().toString())</stringProp>
+      </JSR223PreProcessor>
+      <hashTree/>
+
+    </hashTree>
+
+    <!-- ==================== 测试计划默认配置 ==================== -->
+    <WorkBench guiclass="WorkBenchGui" testclass="WorkBench" testname="工作台"/>
+    <hashTree/>
+
+  </hashTree>
+</jmeterTestPlan>

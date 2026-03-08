@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Ollama 本地测试">
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <Arguments guiclass="ArgumentsPanel" testclass="Arguments">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="concurrent_users" elementType="Argument">
+            <stringProp name="Argument.name">concurrent_users</stringProp>
+            <stringProp name="Argument.value">${__P(users,10)}</stringProp>
+          </elementProp>
+          <elementProp name="test_duration" elementType="Argument">
+            <stringProp name="Argument.name">test_duration</stringProp>
+            <stringProp name="Argument.value">${__P(duration,60)}</stringProp>
+          </elementProp>
+        </collectionProp>
+      </Arguments>
+
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Prompts CSV">
+        <stringProp name="filename">jmeter/data/prompts.csv</stringProp>
+        <stringProp name="variableNames">prompt_type,prompt</stringProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">false</boolProp>
+      </CSVDataSet>
+
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Ollama Users">
+        <stringProp name="ThreadGroup.num_threads">${concurrent_users}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">10</stringProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${test_duration}</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Ollama Generate">
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">11434</stringProp>
+          <stringProp name="HTTPSampler.path">/api/generate</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encoded">false</boolProp>
+                <stringProp name="Argument.value">{"model":"${model}","prompt":"${prompt}","stream":false}</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Token Extractor">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="filename">jmeter/plans/deepseek_components/token_extractor.groovy</stringProp>
+          </JSR223PostProcessor>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Cost Calculator">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="filename">jmeter/plans/deepseek_components/cost_calculator.groovy</stringProp>
+          </JSR223PostProcessor>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="200 OK">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="200">200</stringProp>
+            </collectionProp>
+          </ResponseAssertion>
+        </hashTree>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

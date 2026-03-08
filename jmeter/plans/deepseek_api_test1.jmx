@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0">
+  <hashTree>
+    <!-- 测试计划 -->
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="DeepSeek API性能测试计划">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="DEEPSEEK_API_KEY" elementType="Argument">
+            <stringProp name="Argument.name">DEEPSEEK_API_KEY</stringProp>
+            <stringProp name="Argument.value">${__P(DEEPSEEK_API_KEY,)}</stringProp>
+            <stringProp name="Argument.desc">DeepSeek API密钥</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <stringProp name="TestPlan.comments">DeepSeek API性能测试</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      
+      <!-- 用户定义的变量 -->
+      <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="用户定义变量">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="api_base_url" elementType="Argument">
+            <stringProp name="Argument.name">api_base_url</stringProp>
+            <stringProp name="Argument.value">https://api.deepseek.com</stringProp>
+            <stringProp name="Argument.desc">API基础URL</stringProp>
+          </elementProp>
+          <elementProp name="model_name" elementType="Argument">
+            <stringProp name="Argument.name">model_name</stringProp>
+            <stringProp name="Argument.value">${__P(model,deepseek-chat)}</stringProp>
+            <stringProp name="Argument.desc">模型名称</stringProp>
+          </elementProp>
+          <elementProp name="concurrent_users" elementType="Argument">
+            <stringProp name="Argument.name">concurrent_users</stringProp>
+            <stringProp name="Argument.value">${__P(users,20)}</stringProp>
+            <stringProp name="Argument.desc">并发用户数</stringProp>
+          </elementProp>
+          <elementProp name="test_duration" elementType="Argument">
+            <stringProp name="Argument.name">test_duration</stringProp>
+            <stringProp name="Argument.value">${__P(duration,300)}</stringProp>
+            <stringProp name="Argument.desc">测试时长</stringProp>
+          </elementProp>
+          <elementProp name="budget_limit" elementType="Argument">
+            <stringProp name="Argument.name">budget_limit</stringProp>
+            <stringProp name="Argument.value">${__P(budget,1.0)}</stringProp>
+            <stringProp name="Argument.desc">预算限制</stringProp>
+          </elementProp>
+        </collectionProp>
+      </Arguments>
+      <hashTree/>
+
+      <!-- HTTP请求默认值 -->
+      <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP请求默认值">
+        <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+          <collectionProp name="Arguments.arguments"/>
+        </elementProp>
+        <stringProp name="HTTPSampler.domain"></stringProp>
+        <stringProp name="HTTPSampler.port"></stringProp>
+        <stringProp name="HTTPSampler.protocol">https</stringProp>
+        <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+        <stringProp name="HTTPSampler.path"></stringProp>
+        <stringProp name="HTTPSampler.concurrentPool">4</stringProp>
+      </ConfigTestElement>
+      <hashTree/>
+
+      <!-- HTTP头管理器 -->
+      <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP头管理器">
+        <collectionProp name="HeaderManager.headers">
+          <elementProp name="Content-Type" elementType="Header">
+            <stringProp name="Header.name">Content-Type</stringProp>
+            <stringProp name="Header.value">application/json</stringProp>
+          </elementProp>
+          <elementProp name="Authorization" elementType="Header">
+            <stringProp name="Header.name">Authorization</stringProp>
+            <stringProp name="Header.value">Bearer ${DEEPSEEK_API_KEY}</stringProp>
+          </elementProp>
+        </collectionProp>
+      </HeaderManager>
+      <hashTree/>
+
+      <!-- CSV数据集配置（读取Prompt） -->
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV数据集 - Prompts">
+        <stringProp name="filename">jmeter/data/prompts.csv</stringProp>
+        <stringProp name="fileEncoding">UTF-8</stringProp>
+        <stringProp name="variableNames">prompt_type,prompt,expected_min,expected_max</stringProp>
+        <boolProp name="ignoreFirstLine">true</boolProp>
+        <boolProp name="quotedData">false</boolProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">false</boolProp>
+        <stringProp name="shareMode">shareMode.all</stringProp>
+      </CSVDataSet>
+      <hashTree/>
+
+      <!-- 线程组 -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="DeepSeek API测试线程组">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${concurrent_users}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">30</stringProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${test_duration}</stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        
+        <!-- 事务控制器（单次对话） -->
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="DeepSeek请求事务">
+          <boolProp name="TransactionController.includeTimers">true</boolProp>
+          <boolProp name="TransactionController.parent">false</boolProp>
+        </TransactionController>
+        <hashTree>
+          
+          <!-- HTTP请求：发送Prompt -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="DeepSeek Chat Completion">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPSampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="request_body" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{
+  "model": "${model_name}",
+  "messages": [
+    {
+      "role": "user",
+      "content": "${prompt}"
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1024,
+  "stream": false
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.protocol">https</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">${api_base_url}/v1/chat/completions</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            
+            <!-- JSON提取器：提取Token -->
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON提取器 - Token信息">
+              <stringProp name="JSONPostProcessor.referenceNames">total_tokens</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.usage.total_tokens</stringProp>
+              <stringProp name="JSONPostProcessor.match_numbers">0</stringProp>
+            </JSONPostProcessor>
+            <hashTree/>
+            
+            <!-- JSR223后处理器：提取详细Token -->
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223后处理器 - Token提取">
+              <stringProp name="cacheKey"></stringProp>
+              <stringProp name="filename">jmeter/plans/components/token_extractor.groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+            
+            <!-- JSR223后处理器：计算成本 -->
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223后处理器 - 成本计算">
+              <stringProp name="cacheKey"></stringProp>
+              <stringProp name="filename">jmeter/plans/components/cost_calculator.groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+            
+          </hashTree>
+          
+          <!-- 响应断言 -->
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="响应断言 - 检查成功">
+            <collectionProp name="Assertion.test_strings">
+              <stringProp name="465830235">200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">8</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          
+        </hashTree>
+        
+        <!-- 监听器：查看结果树 -->
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="查看结果树">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>true</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">results/jtl/results-api-${__time(yyyyMMdd-HHmmss)}.jtl</stringProp>
+        </ResultCollector>
+        <hashTree/>
+        
+        <!-- 监听器：聚合报告 -->
+        <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="聚合报告">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>true</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">results/jtl/summary-api-${__time(yyyyMMdd-HHmmss)}.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+        
+      </hashTree>
+      
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
