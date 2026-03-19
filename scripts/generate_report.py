@@ -860,7 +860,26 @@ def parse_args():
 def main():
     """主函数"""
     args = parse_args()
-
+    
+    # 智能处理相对路径：基于当前工作目录或脚本所在目录
+    script_dir = Path(__file__).parent
+    
+    # 如果使用的是默认参数（相对路径），需要转换为相对于项目根目录的绝对路径
+    if args.results_dir == '../results':
+        # 尝试从当前工作目录推断项目根目录
+        cwd = Path.cwd()
+        # 向上查找包含 results 目录的父目录
+        for parent in [cwd] + list(cwd.parents):
+            if (parent / 'results').exists() and (parent / 'scripts').exists():
+                args.results_dir = parent / 'results'
+                args.output_dir = parent / 'results' / 'reports'
+                logger.info(f"📂 已定位项目根目录：{parent}")
+                break
+        else:
+            # 如果找不到，使用脚本所在目录的上级作为项目根目录
+            args.results_dir = script_dir.parent / 'results'
+            args.output_dir = script_dir.parent / 'results' / 'reports'
+    
     generator = ReportGenerator(
         results_dir=args.results_dir,
         output_dir=args.output_dir

@@ -240,3 +240,8 @@ check-github-ssh.ps1
 results/
 *.jtl
 *.csv
+
+
+ansewer.md
+
+run-jenkins.sh
